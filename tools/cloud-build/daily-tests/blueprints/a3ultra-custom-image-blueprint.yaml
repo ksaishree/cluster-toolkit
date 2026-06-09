@@ -383,10 +383,20 @@ deployment_groups:
     source: modules/scripts/startup-script
     settings:
       runners:
+      - type: data
+        destination: /etc/enroot/enroot.conf
+        content: |
+          ENROOT_CONFIG_PATH     ${HOME}/.enroot
+          ENROOT_RUNTIME_PATH    $(vars.local_ssd_mountpoint)/${UID}/enroot/runtime
+          ENROOT_CACHE_PATH      $(vars.local_ssd_mountpoint)/${UID}/enroot/cache
+          ENROOT_DATA_PATH       $(vars.local_ssd_mountpoint)/${UID}/enroot/data
+          ENROOT_TEMP_PATH       $(vars.local_ssd_mountpoint)/${UID}/enroot
       - type: shell
         destination: stage_scripts.sh
         content: |
           #!/bin/bash
+          mkdir -p /mnt/localssd
+          chmod 1777 /mnt/localssd
           SLURM_ROOT=/opt/apps/adm/slurm
           PARTITION_NAME=$(a3_ultra_partition.partitions[0].partition_name)
           mkdir -m 0755 -p "${SLURM_ROOT}/scripts"
@@ -417,3 +427,5 @@ deployment_groups:
       machine_type: n2-standard-80
       controller_startup_script: $(controller_startup.startup_script)
       enable_external_prolog_epilog: true
+
+
